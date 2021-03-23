@@ -4,8 +4,9 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 SpringTempo/target/
-!SpringTempo/.mvn/wrapper/maven-wrapper.jar
-
+SpringTempo/!.mvn/wrapper/maven-wrapper.jar
+SpringTempo/!**/src/main/**/target/
+SpringTempo/!**/src/test/**/target/
 ### STS ###
 .apt_generated
 .classpath
