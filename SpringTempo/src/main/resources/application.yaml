@@ -1,0 +1,17 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: tempoUser
+    password: passwd
+    url: jdbc:mysql://localhost:3306/tempodb?serverTimezone=UTC&useLegacyDatetimeCode=false
+  jpa:
+    show-sql: false
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+    hibernate:
+      ddl-auto: update
+      format-sql: true
+      use_sql_comments: false
+  mvc:
+    throw-exception-if-no-handler-found: true
+  resources:
+    add-mappings: false
