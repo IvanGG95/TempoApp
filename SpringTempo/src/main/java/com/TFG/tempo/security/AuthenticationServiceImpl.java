@@ -8,6 +8,7 @@ import java.util.List;
 import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -28,6 +29,10 @@ public class AuthenticationServiceImpl implements AuthenticationProvider {
     String password = authentication.getCredentials().toString();
 
     User user = userService.findByUsername(name);
+
+    if (user == null) {
+      throw new AuthenticationServiceException("Invalid User");
+    }
 
     List<GrantedAuthority> authorities = new ArrayList<>();
     for (Role role : user.getRoles()) {

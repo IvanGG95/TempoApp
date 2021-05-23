@@ -4,7 +4,7 @@ import com.TFG.tempo.data.entities.Role;
 import com.TFG.tempo.data.entities.User;
 import com.TFG.tempo.data.repository.RoleRepository;
 import com.TFG.tempo.data.repository.UserRepository;
-import java.util.Arrays;
+import java.util.Collections;
 import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
@@ -32,7 +32,6 @@ public class SetupDataLoader implements
   }
 
   @Override
-  @Transactional
   public void onApplicationEvent(ContextRefreshedEvent event) {
     if (alreadySetup) {
       return;
@@ -40,21 +39,43 @@ public class SetupDataLoader implements
 
     createRoleIfNotFound("ROLE_ADMIN");
     createRoleIfNotFound("ROLE_USER");
-
-    Role adminRole = roleRepository.findByName("ROLE_ADMIN");
-    User user = new User();
-    user.setUsername("Test");
-    user.setPassword(passwordEncoder().encode("test"));
-    user.setEmail("test@test.com");
-    user.setRoles(Arrays.asList(adminRole));
-    user.setEnabled(true);
-    createUserIfNotFound(user);
+    createAdminIfNotExists();
+    createUserIfNotExists("");
+    createUserIfNotExists("1");
+    createUserIfNotExists("2");
 
     alreadySetup = true;
   }
 
+  void createAdminIfNotExists() {
+    Role adminRole = roleRepository.findByName("ROLE_ADMIN");
+    User admin = new User();
+    admin.setUsername("Admin");
+    admin.setPassword(passwordEncoder().encode("Admin"));
+    admin.setEmail("Admin@Admin.com");
+    admin.setRoles(Collections.singletonList(adminRole));
+    admin.setEnabled(true);
+    admin.setAvailableFreeDays(22);
+    admin.setWeeklyWorkHours(42);
+    createUserIfNotFound(admin);
+  }
+
+  void createUserIfNotExists(String num) {
+    Role userRole = roleRepository.findByName("ROLE_USER");
+    User admin = new User();
+    admin.setUsername("User" + num);
+    admin.setPassword(passwordEncoder().encode("User" + num));
+    admin.setEmail("User" + num + "@User.com");
+    admin.setRoles(Collections.singletonList(userRole));
+    admin.setEnabled(true);
+    admin.setAvailableFreeDays(22);
+    admin.setWeeklyWorkHours(42);
+    admin.setPersonInCharge(userRepository.findByUsername("Admin"));
+    createUserIfNotFound(admin);
+  }
+
   @Transactional
-  Role createRoleIfNotFound(
+  void createRoleIfNotFound(
       String name) {
 
     Role role = roleRepository.findByName(name);
@@ -62,14 +83,13 @@ public class SetupDataLoader implements
       role = new Role(name);
       roleRepository.save(role);
     }
-    return role;
   }
 
   @Transactional
-  void createUserIfNotFound(User user) {
-    User getUser = userRepository.findByUsername(user.getUsername());
+  void createUserIfNotFound(User admin) {
+    User getUser = userRepository.findByUsername(admin.getUsername());
     if (getUser == null) {
-      userRepository.save(user);
+      userRepository.save(admin);
     }
   }
 }
