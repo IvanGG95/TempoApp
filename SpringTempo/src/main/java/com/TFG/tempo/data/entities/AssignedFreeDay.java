@@ -3,9 +3,11 @@ package com.TFG.tempo.data.entities;
 
 import java.io.Serializable;
 import java.util.Date;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -24,14 +26,16 @@ import lombok.NoArgsConstructor;
 @Entity
 public class AssignedFreeDay implements Serializable {
 
+  private static final long serialVersionUID = -8299055893559896471L;
+
   @Id
-  @GeneratedValue
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long freeDayId;
 
   @Temporal(TemporalType.DATE)
   private Date date;
 
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne
   @JoinColumn(name = "user_id")
   private User user;
 

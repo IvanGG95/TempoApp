@@ -1,11 +1,12 @@
 package com.TFG.tempo.data.dtos;
 
 
-import com.TFG.tempo.data.entities.User;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import java.io.Serializable;
+import java.util.List;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -35,7 +36,10 @@ public class UserDTO implements Serializable {
   @NotBlank
   private String email;
 
-  private User personInCharge;
+  private Long personInChargeId;
+
+  @NotEmpty
+  private List<RoleDTO> roles;
 
   @JsonPOJOBuilder(withPrefix = "")
   public static class UserDTOBuilder {

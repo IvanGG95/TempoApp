@@ -15,3 +15,10 @@ spring:
     throw-exception-if-no-handler-found: true
   resources:
     add-mappings: false
+logging:
+  level:
+    root: INFO
+    org.springframework.web: INFO
+    com.howtodoinjava: INFO
+    org.hibernate: INFO
+

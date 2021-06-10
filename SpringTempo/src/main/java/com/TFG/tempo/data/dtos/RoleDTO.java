@@ -2,8 +2,6 @@ package com.TFG.tempo.data.dtos;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
-import java.io.Serializable;
-import java.util.Date;
 import javax.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -11,25 +9,16 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
 @Data
-@Builder(builderClassName = "AssignedFreeDayDTOBuilder", toBuilder = true)
+@Builder(builderClassName = "RoleDTOBuilder", toBuilder = true)
 @NoArgsConstructor(access = AccessLevel.PUBLIC)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-@JsonDeserialize(builder = AssignedFreeDayDTO.AssignedFreeDayDTOBuilder.class)
-public class AssignedFreeDayDTO implements Serializable {
-
-  private Long freeDayId;
-
+@JsonDeserialize(builder = RoleDTO.RoleDTOBuilder.class)
+public class RoleDTO {
   @NotNull
-  private Date date;
-
-  @NotNull
-  private Long userId;
-
-  private String username;
+  private String name;
 
   @JsonPOJOBuilder(withPrefix = "")
-  public static class AssignedFreeDayDTOBuilder {
+  public static class RoleDTOBuilder {
   }
 }

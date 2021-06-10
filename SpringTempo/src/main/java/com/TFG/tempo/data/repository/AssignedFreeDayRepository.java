@@ -15,7 +15,11 @@ public interface AssignedFreeDayRepository extends JpaRepository<AssignedFreeDay
 
   boolean existsByUserUserIdAndDate(Long userId, Date date);
 
+  AssignedFreeDay findByUserUserIdAndDate(Long userId, Date date);
+
   @Query(value = "SELECT * FROM assigned_free_day where assigned_free_day.date BETWEEN ?1 AND ?2",
       nativeQuery = true)
   List<AssignedFreeDay> findAllBetweenTwoMonths(Date startDate, Date endDate);
+
+  List<AssignedFreeDay> findByDate(Date date);
 }
