@@ -9,7 +9,8 @@ import org.mapstruct.Mappings;
 @Mapper(componentModel = "spring")
 public abstract class AssignedFreeDaysMapper {
   @Mappings({
-      @Mapping(target = "userId", source = "user.userId")
+      @Mapping(target = "userId", source = "user.userId"),
+      @Mapping(target = "username", source = "user.username")
   })
   public abstract AssignedFreeDayDTO toAssignedFreeDayDTO(AssignedFreeDay assignedFreeDay);
 

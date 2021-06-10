@@ -69,6 +69,7 @@ public class UserController {
   public ResponseEntity<Object> getWorkersByUsername(@RequestParam String userName) {
     List<UserDTO> userDTOList = new ArrayList<>();
     for (User user : userService.findUsersByPersonInChargeName(userName)) {
+      user.setPassword(null);
       userDTOList.add(userMapper.toUserDTO(user));
     }
     return new ResponseEntity<>(userDTOList, HttpStatus.OK);
