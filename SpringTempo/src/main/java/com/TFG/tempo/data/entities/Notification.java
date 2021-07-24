@@ -1,6 +1,5 @@
 package com.TFG.tempo.data.entities;
 
-
 import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.Entity;
@@ -16,25 +15,28 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 
 @Builder(toBuilder = true)
 @Data
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PUBLIC)
 @Entity
-public class AssignedFreeDay implements Serializable {
-
-  private static final long serialVersionUID = -8299055893559896471L;
+public class Notification implements Serializable {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long freeDayId;
+  private Long notificationId;
 
-  @Temporal(TemporalType.DATE)
-  private Date date;
+  @CreationTimestamp
+  @Temporal(TemporalType.TIMESTAMP)
+  private Date creationDate;
 
   @ManyToOne
   @JoinColumn(referencedColumnName = "userId")
-  private User user;
+  private User receiver;
 
+  private String description;
+
+  private boolean visualized;
 }
