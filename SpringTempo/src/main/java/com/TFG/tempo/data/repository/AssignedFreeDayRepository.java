@@ -9,8 +9,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface AssignedFreeDayRepository extends JpaRepository<AssignedFreeDay, Long> {
-  void deleteAssignedFreeDayByUserUserIdAndDate(Long userId, Date date);
-
   List<AssignedFreeDay> findByUserUserId(Long userId);
 
   boolean existsByUserUserIdAndDate(Long userId, Date date);

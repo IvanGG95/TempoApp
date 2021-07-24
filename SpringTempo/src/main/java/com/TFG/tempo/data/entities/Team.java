@@ -1,13 +1,13 @@
 package com.TFG.tempo.data.entities;
 
-
-import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -16,25 +16,36 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 
 @Builder(toBuilder = true)
 @Data
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PUBLIC)
 @Entity
-public class AssignedFreeDay implements Serializable {
-
-  private static final long serialVersionUID = -8299055893559896471L;
+public class Team {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long freeDayId;
+  @GeneratedValue
+  private Long teamId;
 
-  @Temporal(TemporalType.DATE)
-  private Date date;
+  @CreationTimestamp
+  @Temporal(TemporalType.TIMESTAMP)
+  private Date creationDate;
+
+  private String name;
 
   @ManyToOne
-  @JoinColumn(referencedColumnName = "userId")
-  private User user;
+  private User owner;
 
+  @ManyToMany
+  @JoinTable(
+      name = "user_teams",
+      joinColumns = @JoinColumn(
+          name = "user_id"),
+      inverseJoinColumns = @JoinColumn(
+          name = "team_id"))
+  private List<User> employees;
+
+  private String description;
 }
