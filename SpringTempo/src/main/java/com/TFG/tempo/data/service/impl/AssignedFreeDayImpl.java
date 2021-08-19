@@ -32,13 +32,11 @@ public class AssignedFreeDayImpl implements AssignedFreeDayService {
   @Autowired
   ReunionMapper reunionMapper;
   @Autowired
-  private AssignedFreeDayRepository assignedFreeDayRepository;
-
-  @Autowired
   UserRepository userRepository;
-
   @Autowired
   AssignedFreeDaysMapper assignedFreeDaysMapper;
+  @Autowired
+  private AssignedFreeDayRepository assignedFreeDayRepository;
   @Autowired
   private ReunionRepository reunionRepository;
 
