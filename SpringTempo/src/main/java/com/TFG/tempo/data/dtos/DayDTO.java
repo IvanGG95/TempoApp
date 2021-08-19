@@ -29,6 +29,8 @@ public class DayDTO {
 
   List<AssignedFreeDayDTO> assignedFreeDays;
 
+  List<ReunionDTO> reunions;
+
   String date;
 
   int dayActual;

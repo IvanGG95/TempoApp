@@ -51,6 +51,11 @@ public class Reunion implements Serializable {
           name = "reunion_id"))
   private List<User> assistant;
 
+
+  @ManyToOne
+  @JoinColumn(referencedColumnName = "teamId")
+  private Team team;
+
   private String description;
 
 }

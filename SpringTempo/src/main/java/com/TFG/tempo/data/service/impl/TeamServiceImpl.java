@@ -1,8 +1,10 @@
 package com.TFG.tempo.data.service.impl;
 
 import com.TFG.tempo.data.dtos.TeamDTOAdd;
+import com.TFG.tempo.data.entities.Petition;
 import com.TFG.tempo.data.entities.Team;
 import com.TFG.tempo.data.entities.User;
+import com.TFG.tempo.data.repository.PetitionRepository;
 import com.TFG.tempo.data.repository.TeamRepository;
 import com.TFG.tempo.data.repository.UserRepository;
 import com.TFG.tempo.data.service.api.TeamService;
@@ -20,6 +22,9 @@ public class TeamServiceImpl implements TeamService {
 
   @Autowired
   UserRepository userRepository;
+
+  @Autowired
+  PetitionRepository petitionRepository;
 
   @Override
   public Team findByOwnerUserId(Long userId) {
@@ -52,6 +57,7 @@ public class TeamServiceImpl implements TeamService {
     team.setDescription(teamDTOAdd.getDescription());
     team.setName(teamDTOAdd.getName());
     team.setOwner(userRepository.findByUsername(teamDTOAdd.getOwnerUsername()));
+
     return teamRepository.save(team);
   }
 
@@ -68,6 +74,30 @@ public class TeamServiceImpl implements TeamService {
     team.setEmployees(users);
 
     return team;
+  }
+
+  public boolean deleteTeamById(Long id) {
+
+    if (!teamRepository.findById(id).isPresent()) {
+      return false;
+    }
+
+    List<Petition> petitions = petitionRepository.findByTeamTeamId(id);
+
+    for (Petition petition : petitions) {
+      petitionRepository.delete(petition);
+    }
+    teamRepository.deleteById(id);
+    return true;
+  }
+
+  @Transactional
+  private List<User> getUsers(List<String> usersName) {
+    List<User> users = new ArrayList<>();
+    for (String userName : usersName) {
+      users.add(userRepository.findByUsername(userName));
+    }
+    return users;
   }
 
 

@@ -2,6 +2,7 @@ package com.TFG.tempo.data.dtos;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+import java.util.List;
 import javax.validation.constraints.NotEmpty;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -24,6 +25,8 @@ public class TeamDTOAdd {
 
   @NotEmpty
   private String description;
+
+  private List<String> users;
 
   @JsonPOJOBuilder(withPrefix = "")
   public static class TeamDTOAddBuilder {

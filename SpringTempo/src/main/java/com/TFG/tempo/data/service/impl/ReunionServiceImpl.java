@@ -1,9 +1,13 @@
 package com.TFG.tempo.data.service.impl;
 
 import com.TFG.tempo.data.dtos.ReunionAddDTO;
+import com.TFG.tempo.data.entities.Petition;
 import com.TFG.tempo.data.entities.Reunion;
+import com.TFG.tempo.data.entities.Team;
 import com.TFG.tempo.data.entities.User;
+import com.TFG.tempo.data.repository.PetitionRepository;
 import com.TFG.tempo.data.repository.ReunionRepository;
+import com.TFG.tempo.data.repository.TeamRepository;
 import com.TFG.tempo.data.repository.UserRepository;
 import com.TFG.tempo.data.service.api.ReunionService;
 import java.text.ParseException;
@@ -25,8 +29,14 @@ public class ReunionServiceImpl implements ReunionService {
   @Autowired
   UserRepository userRepository;
 
+  @Autowired
+  TeamRepository teamRepository;
+
+  @Autowired
+  PetitionRepository petitionRepository;
+
   @Override
-  public Reunion findByCreatorUserId(Long userId) {
+  public List<Reunion> findByCreatorUserId(Long userId) {
     return reunionRepository.findByCreatorUserId(userId);
   }
 
@@ -36,7 +46,7 @@ public class ReunionServiceImpl implements ReunionService {
   }
 
   @Override
-  public Reunion findByCreatorUserUsername(String username) {
+  public List<Reunion> findByCreatorUserUsername(String username) {
     return reunionRepository.findByCreatorUsername(username);
   }
 
@@ -52,8 +62,8 @@ public class ReunionServiceImpl implements ReunionService {
 
   @Override
   @Transactional
-  public Reunion addAssistantByUserId(Long userId, Long notificationId) {
-    Optional<Reunion> reunion = reunionRepository.findById(notificationId);
+  public Reunion addAssistantByUserId(Long userId, Long reunionId) {
+    Optional<Reunion> reunion = reunionRepository.findById(reunionId);
     if (reunion.isPresent()) {
       Optional<User> user = userRepository.findById(userId);
       user.ifPresent(value -> reunion.get().getAssistant().add(userId.intValue(), value));
@@ -63,8 +73,8 @@ public class ReunionServiceImpl implements ReunionService {
   }
 
   @Override
-  public Reunion addAssistantByUsername(String username, Long notificationId) {
-    Optional<Reunion> reunion = reunionRepository.findById(notificationId);
+  public Reunion addAssistantByUsername(String username, Long reunionId) {
+    Optional<Reunion> reunion = reunionRepository.findById(reunionId);
     if (reunion.isPresent()) {
       User user = userRepository.findByUsername(username);
       if (user != null) {
@@ -111,14 +121,51 @@ public class ReunionServiceImpl implements ReunionService {
     reunion.setCreator(creator);
     reunion.setDate(reunionAddDTO.getDate());
     reunion.setDescription(reunionAddDTO.getDescription());
-    reunionRepository.save(reunion);
-    return reunion;
+    Optional<Team> team = teamRepository.findById(reunionAddDTO.getTeamId());
+    team.ifPresent(reunion::setTeam);
+    return reunionRepository.save(reunion);
   }
 
   private Date transformDate(Date date) throws ParseException {
     String pattern = "yyyy-MM-dd'T'HH:mm:ss";
     SimpleDateFormat sdf = new SimpleDateFormat(pattern);
     return sdf.parse(date.toString());
+  }
+
+  @Override
+  @Transactional
+  public Reunion addAssistantsToReunion(List<String> userNames, Long id) {
+
+    Reunion reunion = reunionRepository.getOne(id);
+    List<User> users = new ArrayList<>();
+    for (String userName : userNames) {
+      users.add(userRepository.findByUsername(userName));
+    }
+
+    reunion.setAssistant(users);
+
+    return reunion;
+  }
+
+  @Override
+  public boolean deleteReunion(Long id) {
+
+    if (!reunionRepository.findById(id).isPresent()) {
+      return false;
+    }
+
+    List<Petition> petitions = petitionRepository.findByReunionReunionId(id);
+
+    for (Petition petition : petitions) {
+      petitionRepository.delete(petition);
+    }
+    reunionRepository.deleteById(id);
+    return true;
+  }
+
+  public Reunion findById(Long id) {
+    Optional<Reunion> reunion = reunionRepository.findById(id);
+    return reunion.orElse(null);
   }
 
 }

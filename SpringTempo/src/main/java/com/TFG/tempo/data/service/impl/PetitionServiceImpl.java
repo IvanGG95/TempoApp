@@ -93,4 +93,12 @@ public class PetitionServiceImpl implements PetitionService {
   public List<Petition> findByCreatorUserIdAndStatus(Long userId, String status) {
     return petitionRepository.findByCreatorUserIdAndStatus(userId, status);
   }
+
+  @Override
+  public boolean deletePetition(Long id) {
+
+    petitionRepository.deleteById(id);
+    return !petitionRepository.findById(id).isPresent();
+
+  }
 }

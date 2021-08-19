@@ -52,4 +52,9 @@ public class UserServiceImpl implements UserService {
     }
     return null;
   }
+
+  @Override
+  public List<User> findByUsernameContaining(String username) {
+    return userRepository.findByUsernameContaining(username);
+  }
 }

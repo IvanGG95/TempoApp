@@ -56,6 +56,7 @@ public class SetupDataLoader implements
     admin.setRoles(Collections.singletonList(adminRole));
     admin.setEnabled(true);
     admin.setAvailableFreeDays(22);
+    admin.setTotalFreeDays(22);
     admin.setWeeklyWorkHours(42);
     createUserIfNotFound(admin);
   }
@@ -69,6 +70,7 @@ public class SetupDataLoader implements
     admin.setRoles(Collections.singletonList(userRole));
     admin.setEnabled(true);
     admin.setAvailableFreeDays(22);
+    admin.setTotalFreeDays(22);
     admin.setWeeklyWorkHours(42);
     admin.setPersonInCharge(userRepository.findByUsername("Admin"));
     createUserIfNotFound(admin);

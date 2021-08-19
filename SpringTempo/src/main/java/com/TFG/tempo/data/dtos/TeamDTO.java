@@ -17,6 +17,8 @@ import lombok.NoArgsConstructor;
 @JsonDeserialize(builder = TeamDTO.TeamDTOBuilder.class)
 public class TeamDTO {
 
+  private Long teamId;
+
   private Date creationDate;
 
   private String name;

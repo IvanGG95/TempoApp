@@ -20,4 +20,6 @@ public interface TeamService {
   Team addTeam(TeamDTOAdd teamDTOAdd);
 
   Team addEmployeesToTeam(List<String> userNames, Long id);
+
+  boolean deleteTeamById(Long id);
 }

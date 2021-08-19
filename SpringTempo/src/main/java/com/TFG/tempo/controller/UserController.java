@@ -8,9 +8,12 @@ import com.TFG.tempo.data.mapper.UserMapper;
 import com.TFG.tempo.data.service.api.RoleService;
 import com.TFG.tempo.data.service.api.UserService;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
+import java.util.logging.Logger;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -44,6 +47,14 @@ public class UserController {
   @PostMapping(consumes = "application/json", produces = "application/json")
   public ResponseEntity<Object> createUser(@Valid @RequestBody UserDTO userDTO) throws ParseException {
 
+    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd 'at' HH:mm:ss");
+    Date date = new Date(System.currentTimeMillis());
+
+    Logger.getGlobal().info("[INFO Controller] ///\\\\\\ Tempo " + formatter.format(date) +
+        this.getClass().getSimpleName() + " - " +
+        new Object() {
+        }.getClass().getEnclosingMethod().getName());
+
     userDTO.setPassword(passwordEncoder.encode(userDTO.getPassword()));
     User user = userMapper.toUser(userDTO);
     Collection<Role> roles = new ArrayList<>();
@@ -61,12 +72,29 @@ public class UserController {
   @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
   @GetMapping(value = "/{userName}", produces = "application/json")
   public ResponseEntity<Object> getUserByUsername(@PathVariable String userName) {
+
+    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd 'at' HH:mm:ss");
+    Date date = new Date(System.currentTimeMillis());
+
+    Logger.getGlobal().info("[INFO Controller] ///\\\\\\ Tempo " + formatter.format(date) +
+        this.getClass().getSimpleName() + " - " +
+        new Object() {
+        }.getClass().getEnclosingMethod().getName());
+
     return new ResponseEntity<>(userMapper.toUserDTO(userService.findByUsername(userName)), HttpStatus.OK);
   }
 
   @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
   @GetMapping(value = "workers/", produces = "application/json")
   public ResponseEntity<Object> getWorkersByUsername(@RequestParam String userName) {
+    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd 'at' HH:mm:ss");
+    Date date = new Date(System.currentTimeMillis());
+
+    Logger.getGlobal().info("[INFO Controller] ///\\\\\\ Tempo " + formatter.format(date) +
+        this.getClass().getSimpleName() + " - " +
+        new Object() {
+        }.getClass().getEnclosingMethod().getName());
+
     List<UserDTO> userDTOList = new ArrayList<>();
     for (User user : userService.findUsersByPersonInChargeName(userName)) {
       user.setPassword(null);
@@ -77,6 +105,14 @@ public class UserController {
 
   @GetMapping(value = "authentication", produces = "application/json")
   public ResponseEntity<Object> getAuthentication(@RequestParam String userName) {
+    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd 'at' HH:mm:ss");
+    Date date = new Date(System.currentTimeMillis());
+
+    Logger.getGlobal().info("[INFO Controller] ///\\\\\\ Tempo " + formatter.format(date) +
+        this.getClass().getSimpleName() + " - " +
+        new Object() {
+        }.getClass().getEnclosingMethod().getName());
+
     User user = userService.findByUsername(userName);
     if (user == null) {
       return new ResponseEntity<>("User not exists", HttpStatus.BAD_REQUEST);
@@ -86,5 +122,20 @@ public class UserController {
     userNoPass.setPassword(null);
 
     return new ResponseEntity<>(userNoPass, HttpStatus.OK);
+  }
+
+  @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
+  @GetMapping(value = "/byName/{userName}", produces = "application/json")
+  public ResponseEntity<Object> getUsersByUsername(@PathVariable String userName) {
+
+    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd 'at' HH:mm:ss");
+    Date date = new Date(System.currentTimeMillis());
+
+    Logger.getGlobal().info("[INFO Controller] ///\\\\\\ Tempo " + formatter.format(date) +
+        this.getClass().getSimpleName() + " - " +
+        new Object() {
+        }.getClass().getEnclosingMethod().getName());
+
+    return new ResponseEntity<>(userMapper.toUsersDto(userService.findByUsernameContaining(userName)), HttpStatus.OK);
   }
 }

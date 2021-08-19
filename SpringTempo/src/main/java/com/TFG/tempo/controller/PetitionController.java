@@ -7,6 +7,8 @@ import com.TFG.tempo.data.entities.Petition;
 import com.TFG.tempo.data.entities.User;
 import com.TFG.tempo.data.mapper.PetitionMapper;
 import com.TFG.tempo.data.service.api.PetitionService;
+import com.TFG.tempo.data.service.api.ReunionService;
+import com.TFG.tempo.data.service.api.TeamService;
 import com.TFG.tempo.data.service.api.UserService;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -34,6 +37,12 @@ public class PetitionController {
 
   @Autowired
   UserService userService;
+
+  @Autowired
+  TeamService teamService;
+
+  @Autowired
+  ReunionService reunionService;
 
   @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
   @PostMapping(produces = "application/json", consumes = "application/json")
@@ -67,10 +76,29 @@ public class PetitionController {
   @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
   @PutMapping(produces = "application/json", consumes = "application/json")
   public ResponseEntity<Object> updatePetition(@Valid @RequestBody PetitionUpdateDTO petitionUpdateDTO) {
-    return new ResponseEntity<>(
+    PetitionDTO petitionDTO =
         petitionMapper.toPetitionDTO(petitionService.updatePetition(petitionUpdateDTO.getPetitionId(),
-            petitionUpdateDTO.getStatus())),
-        HttpStatus.OK);
+            petitionUpdateDTO.getStatus()));
+
+    if (petitionDTO.getStatus().equals(petitionUpdateDTO.getStatus())) {
+      if (petitionDTO.getReunion() != null) {
+        ArrayList<String> employee = new ArrayList<>();
+        employee.add(petitionDTO.getReceiver().getUsername());
+        reunionService.addAssistantsToReunion(employee, petitionDTO.getReunion().getReunionId());
+      }
+      if (petitionDTO.getTeam() != null) {
+        ArrayList<String> employee = new ArrayList<>();
+        employee.add(petitionDTO.getReceiver().getUsername());
+        teamService.addEmployeesToTeam(employee, petitionDTO.getTeam().getTeamId());
+      }
+    }
+    return new ResponseEntity<>(petitionDTO, HttpStatus.OK);
+  }
+
+  @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
+  @DeleteMapping(value = "/{petitionId}", produces = "application/json", consumes = "application/json")
+  public ResponseEntity<Object> deletePetition(@PathVariable("petitionId") Long petitionId) {
+    return new ResponseEntity<>(petitionService.deletePetition(petitionId), HttpStatus.OK);
   }
 
 }

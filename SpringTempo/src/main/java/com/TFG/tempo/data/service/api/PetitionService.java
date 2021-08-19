@@ -19,4 +19,6 @@ public interface PetitionService {
   List<Petition> findByReceiverUserIdAndStatus(Long userId, String status);
 
   List<Petition> findByCreatorUserIdAndStatus(Long userId, String status);
+
+  boolean deletePetition(Long id);
 }

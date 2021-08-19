@@ -15,4 +15,8 @@ public interface PetitionRepository extends JpaRepository<Petition, Long> {
   List<Petition> findByReceiverUserIdAndStatus(Long userId, String status);
 
   List<Petition> findByCreatorUserIdAndStatus(Long userId, String status);
+
+  List<Petition> findByTeamTeamId(Long teamId);
+
+  List<Petition> findByReunionReunionId(Long reunionId);
 }

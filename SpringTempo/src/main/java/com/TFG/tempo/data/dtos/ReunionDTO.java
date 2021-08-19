@@ -10,12 +10,15 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+
 @Data
 @Builder(builderClassName = "ReunionDTOBuilder", toBuilder = true)
 @NoArgsConstructor(access = AccessLevel.PUBLIC)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @JsonDeserialize(builder = ReunionDTO.ReunionDTOBuilder.class)
 public class ReunionDTO {
+
+  private Long reunionId;
 
   private Date date;
 
@@ -24,6 +27,12 @@ public class ReunionDTO {
   private List<UserDTO> assistant;
 
   private String description;
+
+  private TeamDTO team;
+
+  private String days;
+
+  private String hours;
 
   @JsonPOJOBuilder(withPrefix = "")
   public static class ReunionDTOBuilder {

@@ -7,11 +7,11 @@ import java.util.List;
 
 public interface ReunionService {
 
-  Reunion findByCreatorUserId(Long userId);
+  List<Reunion> findByCreatorUserId(Long userId);
 
   List<Reunion> findByAssistantUserId(Long userId);
 
-  Reunion findByCreatorUserUsername(String username);
+  List<Reunion> findByCreatorUserUsername(String username);
 
   List<Reunion> findByAssistantUsername(String username);
 
@@ -26,4 +26,10 @@ public interface ReunionService {
   Reunion deleteAssistantByUsername(String username, Long notificationId);
 
   Reunion addReunion(ReunionAddDTO reunionAddDTO);
+
+  Reunion addAssistantsToReunion(List<String> userNames, Long id);
+
+  boolean deleteReunion(Long id);
+
+  Reunion findById(Long id);
 }

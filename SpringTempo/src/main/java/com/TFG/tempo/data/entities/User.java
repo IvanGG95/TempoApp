@@ -35,6 +35,8 @@ public class User implements Serializable {
 
   private int availableFreeDays;
 
+  private int totalFreeDays;
+
   @NaturalId(mutable = true)
   private String username;
 

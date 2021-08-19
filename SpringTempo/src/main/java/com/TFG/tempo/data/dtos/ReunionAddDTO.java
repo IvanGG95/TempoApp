@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import java.util.Date;
+import java.util.List;
 import javax.validation.constraints.NotEmpty;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -27,6 +28,11 @@ public class ReunionAddDTO {
 
   @NotEmpty
   private String description;
+
+  private List<String> users;
+
+  @NotEmpty
+  private Long teamId;
 
   @JsonPOJOBuilder(withPrefix = "")
   public static class ReunionAddDTOBuilder {
