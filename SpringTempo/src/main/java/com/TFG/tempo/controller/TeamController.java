@@ -5,6 +5,7 @@ import com.TFG.tempo.data.dtos.TeamDTO;
 import com.TFG.tempo.data.dtos.TeamDTOAdd;
 import com.TFG.tempo.data.entities.Team;
 import com.TFG.tempo.data.mapper.TeamMapper;
+import com.TFG.tempo.data.repository.TeamRepository;
 import com.TFG.tempo.data.service.api.PetitionService;
 import com.TFG.tempo.data.service.api.TeamService;
 import java.text.SimpleDateFormat;
@@ -17,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@CrossOrigin
 @RequestMapping("/team")
 public class TeamController {
 
@@ -34,6 +37,9 @@ public class TeamController {
 
   @Autowired
   TeamMapper teamMapper;
+
+  @Autowired
+  TeamRepository teamRepository;
 
   @Autowired
   PetitionService petitionService;
@@ -49,6 +55,14 @@ public class TeamController {
         this.getClass().getSimpleName() + " - " +
         new Object() {
         }.getClass().getEnclosingMethod().getName());
+
+    List<Team> teams = teamService.findByOwnerUsername(teamDTOAdd.getOwnerUsername());
+    for (Team team : teams) {
+      if (team.getName().equals(teamDTOAdd.getName())) {
+        return new ResponseEntity<>("[\"Ya tienes un equipo con ese nombre " + teamDTOAdd.getName() + "\"]",
+            HttpStatus.BAD_REQUEST);
+      }
+    }
 
     TeamDTO teamDTO = teamMapper.toTeamDTO(teamService.addTeam(teamDTOAdd));
 
@@ -102,8 +116,21 @@ public class TeamController {
         new Object() {
         }.getClass().getEnclosingMethod().getName());
 
+    if (!teamRepository.findById(teamId).isPresent()) {
+      return new ResponseEntity<>("[\"bad id\"]", HttpStatus.OK);
+    }
+    Team team = teamRepository.findById(teamId).get();
+    for (String username : userNames) {
 
-    return new ResponseEntity<>(teamMapper.toTeamDTO(teamService.addEmployeesToTeam(userNames, teamId)), HttpStatus.OK);
+      petitionService.addPetition(
+          PetitionDTOAdd.builder().
+              creator(team.getOwner().getUsername()).
+              receiver(username)
+              .team(team.getTeamId())
+              .build());
+    }
+
+    return new ResponseEntity<>("[\"Todo bene\"]", HttpStatus.OK);
   }
 
   @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
@@ -120,5 +147,24 @@ public class TeamController {
 
 
     return new ResponseEntity<>(teamService.deleteTeamById(teamId), HttpStatus.OK);
+  }
+
+  @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
+  @PostMapping(value = "exitTeam/{teamId}/{username}", produces = "application/json")
+  public ResponseEntity<Object> exitTeam(@PathVariable("teamId") Long teamId,
+                                         @PathVariable("username") String username) {
+
+    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd 'at' HH:mm:ss");
+    Date date = new Date(System.currentTimeMillis());
+    Logger.getGlobal().info("[INFO Controller] ///\\\\\\ Tempo " + formatter.format(date) +
+        this.getClass().getSimpleName() + " - " +
+        new Object() {
+        }.getClass().getEnclosingMethod().getName());
+
+    if (!teamService.exitTeam(teamId, username)) {
+      return new ResponseEntity<>("[\"El usuario no pudo ser elminado del equipo\"]", HttpStatus.BAD_REQUEST);
+    }
+
+    return new ResponseEntity<>("[\"Todo Bene\"]", HttpStatus.OK);
   }
 }

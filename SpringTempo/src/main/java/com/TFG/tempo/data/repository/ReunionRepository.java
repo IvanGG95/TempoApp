@@ -20,9 +20,13 @@ public interface ReunionRepository extends JpaRepository<Reunion, Long> {
 
   List<Reunion> findByAssistantUsername(String username);
 
+  List<Reunion> findByTeamTeamId(Long teamId);
+
   List<User> findUsersByReunionId(Long reunionId);
 
   @Query(value = "SELECT * FROM reunion where reunion.date BETWEEN ?1 AND ?2",
       nativeQuery = true)
   List<Reunion> findByDate(Date date, Date endDate);
+
+
 }

@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@CrossOrigin
 @RequestMapping("/reunion")
 public class ReunionController {
   @Autowired
@@ -87,7 +89,6 @@ public class ReunionController {
       reunionDTO.setDays(formatterDay.format(reunionDTO.getDate()));
       reunionDTO.setHours(formatterHour.format(reunionDTO.getDate()));
       reunionDTOs.add(reunionDTO);
-      reunionDTOs.add(reunionMapper.toReunionDTO(reunion));
     }
     return new ResponseEntity<>(reunionDTOs, HttpStatus.OK);
   }
@@ -133,6 +134,25 @@ public class ReunionController {
 
 
     return new ResponseEntity<>(reunionService.deleteReunion(reunionId), HttpStatus.OK);
+  }
+
+  @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
+  @PostMapping(value = "exitReunion/{reunionId}/{username}", produces = "application/json")
+  public ResponseEntity<Object> exitReunion(@PathVariable("reunionId") Long teamId,
+                                            @PathVariable("username") String username) {
+
+    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd 'at' HH:mm:ss");
+    Date date = new Date(System.currentTimeMillis());
+    Logger.getGlobal().info("[INFO Controller] ///\\\\\\ Tempo " + formatter.format(date) +
+        this.getClass().getSimpleName() + " - " +
+        new Object() {
+        }.getClass().getEnclosingMethod().getName());
+
+    if (!reunionService.exitReunion(teamId, username)) {
+      return new ResponseEntity<>("[\"El usuario no pudo ser elminado de la reunion\"]", HttpStatus.BAD_REQUEST);
+    }
+
+    return new ResponseEntity<>("[\"Todo Bene\"]", HttpStatus.OK);
   }
 
 

@@ -144,7 +144,7 @@ public class ReunionServiceImpl implements ReunionService {
 
     reunion.setAssistant(users);
 
-    return reunion;
+    return reunionRepository.save(reunion);
   }
 
   @Override
@@ -166,6 +166,23 @@ public class ReunionServiceImpl implements ReunionService {
   public Reunion findById(Long id) {
     Optional<Reunion> reunion = reunionRepository.findById(id);
     return reunion.orElse(null);
+  }
+
+  @Override
+  @Transactional
+  public boolean exitReunion(Long reunionId, String username) {
+    Optional<Reunion> reunion = reunionRepository.findById(reunionId);
+    if (reunion.isPresent()) {
+      List<User> users = reunion.get().getAssistant();
+      for (User user : users) {
+        if (user.getUsername().equals(username)) {
+          reunion.get().getAssistant().remove(user);
+          break;
+        }
+      }
+      return true;
+    }
+    return false;
   }
 
 }

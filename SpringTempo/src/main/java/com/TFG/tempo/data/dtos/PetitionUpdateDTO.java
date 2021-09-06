@@ -3,6 +3,7 @@ package com.TFG.tempo.data.dtos;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,7 +17,7 @@ import lombok.NoArgsConstructor;
 @JsonDeserialize(builder = PetitionUpdateDTO.PetitionUpdateDTOBuilder.class)
 public class PetitionUpdateDTO {
 
-  @NotEmpty
+  @NotNull
   private Long petitionId;
 
   @NotEmpty

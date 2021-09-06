@@ -22,4 +22,6 @@ public interface UserService {
   List<User> findUsersByPersonInChargeName(String name);
 
   List<User> findByUsernameContaining(String username);
+
+  List<User> findAll();
 }

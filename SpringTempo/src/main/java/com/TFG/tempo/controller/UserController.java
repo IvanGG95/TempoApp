@@ -20,6 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,6 +30,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@CrossOrigin
 @RequestMapping("/user")
 public class UserController {
   @Autowired
@@ -55,6 +57,18 @@ public class UserController {
         new Object() {
         }.getClass().getEnclosingMethod().getName());
 
+    if (userService.findByUsername(userDTO.getUsername()) != null) {
+      return new ResponseEntity<>("[\"Nombre de usuario en uso " + userDTO.getUsername() + "\"]",
+          HttpStatus.BAD_REQUEST);
+    }
+
+    if (userDTO.getPersonInChargeId() == null) {
+      userDTO.setPersonInChargeId(userService.findByUsername("Admin").getUserId());
+    }
+    if (userDTO.getRoles() == null) {
+      userDTO.setRoles(new ArrayList<>());
+      userDTO.getRoles().add(RoleDTO.builder().name("ROLE_USER").build());
+    }
     userDTO.setPassword(passwordEncoder.encode(userDTO.getPassword()));
     User user = userMapper.toUser(userDTO);
     Collection<Role> roles = new ArrayList<>();
@@ -66,7 +80,7 @@ public class UserController {
     user.setRoles(roles);
     userService.saveUser(user);
 
-    return new ResponseEntity<>("Todo bene", HttpStatus.OK);
+    return new ResponseEntity<>("{ \"msn\": \" Todo bene \"}", HttpStatus.OK);
   }
 
   @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
@@ -137,5 +151,26 @@ public class UserController {
         }.getClass().getEnclosingMethod().getName());
 
     return new ResponseEntity<>(userMapper.toUsersDto(userService.findByUsernameContaining(userName)), HttpStatus.OK);
+  }
+
+  @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
+  @GetMapping(value = "/getAll", produces = "application/json")
+  public ResponseEntity<Object> getAllUsers() {
+
+    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd 'at' HH:mm:ss");
+    Date date = new Date(System.currentTimeMillis());
+
+    Logger.getGlobal().info("[INFO Controller] ///\\\\\\ Tempo " + formatter.format(date) +
+        this.getClass().getSimpleName() + " - " +
+        new Object() {
+        }.getClass().getEnclosingMethod().getName());
+
+    List<UserDTO> userDTOList = new ArrayList<>();
+    for (User user : userService.findAll()) {
+      user.setPassword(null);
+      userDTOList.add(userMapper.toUserDTO(user));
+    }
+
+    return new ResponseEntity<>(userDTOList, HttpStatus.OK);
   }
 }

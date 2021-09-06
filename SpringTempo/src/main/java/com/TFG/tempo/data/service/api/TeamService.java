@@ -4,6 +4,7 @@ import com.TFG.tempo.data.dtos.TeamDTOAdd;
 import com.TFG.tempo.data.entities.Team;
 import com.TFG.tempo.data.entities.User;
 import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface TeamService {
 
@@ -22,4 +23,7 @@ public interface TeamService {
   Team addEmployeesToTeam(List<String> userNames, Long id);
 
   boolean deleteTeamById(Long id);
+
+  @Transactional
+  boolean exitTeam(Long teamId, String username);
 }

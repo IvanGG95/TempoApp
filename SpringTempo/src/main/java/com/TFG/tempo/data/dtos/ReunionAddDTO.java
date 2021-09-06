@@ -5,7 +5,8 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import java.util.Date;
 import java.util.List;
-import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,19 +20,19 @@ import lombok.NoArgsConstructor;
 @JsonDeserialize(builder = ReunionAddDTO.ReunionAddDTOBuilder.class)
 public class ReunionAddDTO {
 
-  @NotEmpty
+  @NotNull
   @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
   private Date date;
 
-  @NotEmpty
+  @NotBlank(message = "Es necesario introducir un creador")
   private String creator;
 
-  @NotEmpty
+  @NotBlank(message = "Es necesario introducir una descripcion")
   private String description;
 
   private List<String> users;
 
-  @NotEmpty
+  @NotNull(message = "Es necesario asgnar un equipo")
   private Long teamId;
 
   @JsonPOJOBuilder(withPrefix = "")

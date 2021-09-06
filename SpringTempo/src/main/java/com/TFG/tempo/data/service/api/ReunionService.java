@@ -4,6 +4,7 @@ import com.TFG.tempo.data.dtos.ReunionAddDTO;
 import com.TFG.tempo.data.entities.Reunion;
 import com.TFG.tempo.data.entities.User;
 import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface ReunionService {
 
@@ -32,4 +33,7 @@ public interface ReunionService {
   boolean deleteReunion(Long id);
 
   Reunion findById(Long id);
+
+  @Transactional
+  boolean exitReunion(Long reunionId, String username);
 }

@@ -5,11 +5,13 @@ import com.TFG.tempo.data.dtos.DayDTO;
 import com.TFG.tempo.data.dtos.ReunionDTO;
 import com.TFG.tempo.data.entities.AssignedFreeDay;
 import com.TFG.tempo.data.entities.Reunion;
+import com.TFG.tempo.data.entities.Team;
 import com.TFG.tempo.data.entities.User;
 import com.TFG.tempo.data.mapper.AssignedFreeDaysMapper;
 import com.TFG.tempo.data.mapper.ReunionMapper;
 import com.TFG.tempo.data.repository.AssignedFreeDayRepository;
 import com.TFG.tempo.data.repository.ReunionRepository;
+import com.TFG.tempo.data.repository.TeamRepository;
 import com.TFG.tempo.data.repository.UserRepository;
 import com.TFG.tempo.data.service.api.AssignedFreeDayService;
 import java.text.SimpleDateFormat;
@@ -20,6 +22,7 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.TimeZone;
@@ -39,6 +42,9 @@ public class AssignedFreeDayImpl implements AssignedFreeDayService {
   private AssignedFreeDayRepository assignedFreeDayRepository;
   @Autowired
   private ReunionRepository reunionRepository;
+
+  @Autowired
+  TeamRepository teamRepository;
 
   @Override
   public void addAnAssignedDay(Date date, Long userId) {
@@ -76,6 +82,7 @@ public class AssignedFreeDayImpl implements AssignedFreeDayService {
           user.isPresent()) {
         assignedFreeDayRepository
             .delete(assignedFreeDayRepository.findByUserUserIdAndDate(user.get().getUserId(), dateDTO.getDate()));
+        updateFreeDaysUserDelete(user.get().getUserId());
       } else {
         notFoundDays.add(dateDTO);
       }
@@ -108,11 +115,11 @@ public class AssignedFreeDayImpl implements AssignedFreeDayService {
     Date firstMondayWeek = getFirstMondayWeek(date);
     for (int i = 0; i < 48; i++) {
       DayDTO day = new DayDTO();
-      day.setAssignedFreeDays(getAssignedFreeDays(firstMondayWeek));
+      day.setAssignedFreeDays(relatedPersons(getAssignedFreeDays(firstMondayWeek), userName));
       day.setDayActual(getDayOfMonth(firstMondayWeek));
       day.setDate(format.format(firstMondayWeek));
       day.setWeekEnd(isWeekEnd(firstMondayWeek));
-      day.setReunions(getReunions(firstMondayWeek));
+      day.setReunions(getReunions(firstMondayWeek, userName));
       if (isSameDay(firstMondayWeek, date)) {
         day.setActual(true);
       }
@@ -159,7 +166,7 @@ public class AssignedFreeDayImpl implements AssignedFreeDayService {
     return assignedFreeDayDTOs;
   }
 
-  private List<ReunionDTO> getReunions(Date date) {
+  private List<ReunionDTO> getReunions(Date date, String username) {
     LocalDate actualDate = convertToLocalDateTimeViaInstant(date);
     LocalDateTime startOfDay = LocalDateTime.of(actualDate, LocalTime.MIDNIGHT);
     LocalDateTime endOfDate = LocalDateTime.of(actualDate, LocalTime.MAX);
@@ -169,10 +176,20 @@ public class AssignedFreeDayImpl implements AssignedFreeDayService {
         reunionRepository.findByDate(convertToDateViaInstant(startOfDay), convertToDateViaInstant(endOfDate));
     List<ReunionDTO> reunionsDTO = new ArrayList<>();
     for (Reunion reunion : reunions) {
-      ReunionDTO reunionDTO = reunionMapper.toReunionDTO(reunion);
-      reunionDTO.setDays(formatterDay.format(reunionDTO.getDate()));
-      reunionDTO.setHours(formatterHour.format(reunionDTO.getDate()));
-      reunionsDTO.add(reunionDTO);
+      if (reunion.getCreator().getUsername().equals(username)) {
+        ReunionDTO reunionDTO = reunionMapper.toReunionDTO(reunion);
+        reunionDTO.setDays(formatterDay.format(reunionDTO.getDate()));
+        reunionDTO.setHours(formatterHour.format(reunionDTO.getDate()));
+        reunionsDTO.add(reunionDTO);
+      }
+      for (User user : reunion.getAssistant()) {
+        if (user.getUsername().equals(username)) {
+          ReunionDTO reunionDTO = reunionMapper.toReunionDTO(reunion);
+          reunionDTO.setDays(formatterDay.format(reunionDTO.getDate()));
+          reunionDTO.setHours(formatterHour.format(reunionDTO.getDate()));
+          reunionsDTO.add(reunionDTO);
+        }
+      }
     }
     return reunionsDTO;
   }
@@ -216,5 +233,53 @@ public class AssignedFreeDayImpl implements AssignedFreeDayService {
     assert user != null;
     user.setAvailableFreeDays(user.getAvailableFreeDays() - 1);
     userRepository.save(user);
+  }
+
+  private void updateFreeDaysUserDelete(Long userId) {
+    User user = this.userRepository.findById(userId).isPresent() ? this.userRepository.findById(userId).get() : null;
+    assert user != null;
+    user.setAvailableFreeDays(user.getAvailableFreeDays() + 1);
+    userRepository.save(user);
+  }
+
+
+  List<User> findRelatedUsersByUsername(String username) {
+
+    List<Team> teamsEmployee = teamRepository.findByEmployeesUsername(username);
+    List<Team> teamsOwner = teamRepository.findByOwnerUsername(username);
+    HashSet usernames = new HashSet();
+    List<User> users = new ArrayList<>();
+    users.add(userRepository.findByUsername(username));
+    for (Team team : teamsEmployee) {
+      for (User user : team.getEmployees()) {
+        usernames.add(user.getUsername());
+      }
+      usernames.add(team.getOwner().getUsername());
+    }
+
+    for (Team team : teamsOwner) {
+      for (User user : team.getEmployees()) {
+        usernames.add(user.getUsername());
+      }
+    }
+
+    for (Object name : usernames) {
+      users.add(userRepository.findByUsername(name));
+    }
+
+    return users;
+  }
+
+  List<AssignedFreeDayDTO> relatedPersons(List<AssignedFreeDayDTO> assignedFreeDays, String username) {
+    List<User> users = findRelatedUsersByUsername(username);
+    List<AssignedFreeDayDTO> related = new ArrayList<>();
+    for (AssignedFreeDayDTO assignedFreeDayDTO : assignedFreeDays) {
+      for (User user : users) {
+        if (user.getUsername().equals(assignedFreeDayDTO.getUsername())) {
+          related.add(assignedFreeDayDTO);
+        }
+      }
+    }
+    return related;
   }
 }

@@ -2,14 +2,18 @@ package com.TFG.tempo.data.service.impl;
 
 import com.TFG.tempo.data.dtos.TeamDTOAdd;
 import com.TFG.tempo.data.entities.Petition;
+import com.TFG.tempo.data.entities.Reunion;
 import com.TFG.tempo.data.entities.Team;
 import com.TFG.tempo.data.entities.User;
 import com.TFG.tempo.data.repository.PetitionRepository;
+import com.TFG.tempo.data.repository.ReunionRepository;
 import com.TFG.tempo.data.repository.TeamRepository;
 import com.TFG.tempo.data.repository.UserRepository;
+import com.TFG.tempo.data.service.api.ReunionService;
 import com.TFG.tempo.data.service.api.TeamService;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +29,12 @@ public class TeamServiceImpl implements TeamService {
 
   @Autowired
   PetitionRepository petitionRepository;
+
+  @Autowired
+  ReunionRepository reunionRepository;
+
+  @Autowired
+  ReunionService reunionService;
 
   @Override
   public Team findByOwnerUserId(Long userId) {
@@ -66,7 +76,13 @@ public class TeamServiceImpl implements TeamService {
   public Team addEmployeesToTeam(List<String> userNames, Long id) {
 
     Team team = teamRepository.getOne(id);
-    List<User> users = new ArrayList<>();
+    List<User> users;
+    if (team.getEmployees() == null) {
+      users = new ArrayList<>();
+    } else {
+      users = team.getEmployees();
+    }
+
     for (String userName : userNames) {
       users.add(userRepository.findByUsername(userName));
     }
@@ -83,7 +99,11 @@ public class TeamServiceImpl implements TeamService {
     }
 
     List<Petition> petitions = petitionRepository.findByTeamTeamId(id);
+    List<Reunion> reunions = reunionRepository.findByTeamTeamId(id);
 
+    for (Reunion reunion : reunions) {
+      reunionService.deleteReunion(reunion.getReunionId());
+    }
     for (Petition petition : petitions) {
       petitionRepository.delete(petition);
     }
@@ -98,6 +118,23 @@ public class TeamServiceImpl implements TeamService {
       users.add(userRepository.findByUsername(userName));
     }
     return users;
+  }
+
+  @Override
+  @Transactional
+  public boolean exitTeam(Long teamId, String username) {
+    Optional<Team> team = teamRepository.findById(teamId);
+    if (team.isPresent()) {
+      List<User> users = team.get().getEmployees();
+      for (User user : users) {
+        if (user.getUsername().equals(username)) {
+          team.get().getEmployees().remove(user);
+          break;
+        }
+      }
+      return true;
+    }
+    return false;
   }
 
 
