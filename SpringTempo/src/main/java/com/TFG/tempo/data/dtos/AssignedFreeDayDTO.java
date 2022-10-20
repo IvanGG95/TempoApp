@@ -29,6 +29,8 @@ public class AssignedFreeDayDTO implements Serializable {
 
   private String username;
 
+  private String status;
+
   @JsonPOJOBuilder(withPrefix = "")
   public static class AssignedFreeDayDTOBuilder {
   }

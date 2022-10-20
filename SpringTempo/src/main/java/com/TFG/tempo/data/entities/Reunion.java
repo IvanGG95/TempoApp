@@ -3,6 +3,7 @@ package com.TFG.tempo.data.entities;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -56,6 +57,7 @@ public class Reunion implements Serializable {
   @JoinColumn(referencedColumnName = "teamId")
   private Team team;
 
+  @Column(length = 800)
   private String description;
 
 }

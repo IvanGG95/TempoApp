@@ -58,7 +58,10 @@ public class TeamServiceImpl implements TeamService {
 
   @Override
   public List<User> findUsersByTeamId(Long teamId) {
-    return teamRepository.findUsersByTeamId(teamId);
+    Team team = teamRepository.findById(teamId).orElseThrow(RuntimeException::new);
+    List<User> allUsers = team.getEmployees();
+    allUsers.add(team.getOwner());
+    return allUsers;
   }
 
   @Override

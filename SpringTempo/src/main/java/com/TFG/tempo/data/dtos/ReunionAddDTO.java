@@ -1,12 +1,12 @@
 package com.TFG.tempo.data.dtos;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import java.util.Date;
 import java.util.List;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,19 +20,19 @@ import lombok.NoArgsConstructor;
 @JsonDeserialize(builder = ReunionAddDTO.ReunionAddDTOBuilder.class)
 public class ReunionAddDTO {
 
-  @NotNull
-  @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+  @NotNull(message = "Es necesario introducir una fecha")
   private Date date;
 
   @NotBlank(message = "Es necesario introducir un creador")
   private String creator;
 
   @NotBlank(message = "Es necesario introducir una descripcion")
+  @Size(min = 1, max = 400, message = "Texto demasiado grande, como maximo 800 caracteres")
   private String description;
 
   private List<String> users;
 
-  @NotNull(message = "Es necesario asgnar un equipo")
+  @NotNull(message = "Es necesario asignar un equipo")
   private Long teamId;
 
   @JsonPOJOBuilder(withPrefix = "")

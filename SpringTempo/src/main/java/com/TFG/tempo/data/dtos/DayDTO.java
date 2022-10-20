@@ -19,6 +19,8 @@ public class DayDTO {
 
   boolean free = false;
 
+  boolean pending = false;
+
   boolean festive = false;
 
   boolean taken = false;

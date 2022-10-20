@@ -19,4 +19,6 @@ public interface PetitionRepository extends JpaRepository<Petition, Long> {
   List<Petition> findByTeamTeamId(Long teamId);
 
   List<Petition> findByReunionReunionId(Long reunionId);
+
+  List<Petition> findByAssignedFreeDayFreeDayId(Long freeDayId);
 }

@@ -37,4 +37,5 @@ public class AssignedFreeDay implements Serializable {
   @JoinColumn(referencedColumnName = "userId")
   private User user;
 
+  private String status;
 }

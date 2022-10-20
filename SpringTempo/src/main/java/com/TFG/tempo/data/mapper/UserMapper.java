@@ -10,7 +10,7 @@ import org.mapstruct.Mappings;
 
 @Mapper(componentModel = "spring", uses = {UserService.class})
 public abstract class UserMapper {
-
+  @Mapping(target = "password", ignore = true)
   public abstract UserDTO toUserDTO(User user);
 
   @Mappings({

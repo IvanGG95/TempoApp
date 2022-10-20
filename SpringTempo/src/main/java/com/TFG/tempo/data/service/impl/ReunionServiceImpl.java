@@ -10,10 +10,7 @@ import com.TFG.tempo.data.repository.ReunionRepository;
 import com.TFG.tempo.data.repository.TeamRepository;
 import com.TFG.tempo.data.repository.UserRepository;
 import com.TFG.tempo.data.service.api.ReunionService;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -126,12 +123,6 @@ public class ReunionServiceImpl implements ReunionService {
     return reunionRepository.save(reunion);
   }
 
-  private Date transformDate(Date date) throws ParseException {
-    String pattern = "yyyy-MM-dd'T'HH:mm:ss";
-    SimpleDateFormat sdf = new SimpleDateFormat(pattern);
-    return sdf.parse(date.toString());
-  }
-
   @Override
   @Transactional
   public Reunion addAssistantsToReunion(List<String> userNames, Long id) {
@@ -184,5 +175,4 @@ public class ReunionServiceImpl implements ReunionService {
     }
     return false;
   }
-
 }

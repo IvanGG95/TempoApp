@@ -3,15 +3,19 @@ package com.TFG.tempo.controller;
 import com.TFG.tempo.data.dtos.PetitionDTO;
 import com.TFG.tempo.data.dtos.PetitionDTOAdd;
 import com.TFG.tempo.data.dtos.PetitionUpdateDTO;
+import com.TFG.tempo.data.entities.AssignedFreeDay;
 import com.TFG.tempo.data.entities.Petition;
 import com.TFG.tempo.data.entities.User;
 import com.TFG.tempo.data.mapper.PetitionMapper;
+import com.TFG.tempo.data.repository.AssignedFreeDayRepository;
+import com.TFG.tempo.data.repository.PetitionRepository;
 import com.TFG.tempo.data.service.api.PetitionService;
 import com.TFG.tempo.data.service.api.ReunionService;
 import com.TFG.tempo.data.service.api.TeamService;
 import com.TFG.tempo.data.service.api.UserService;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -32,6 +36,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/petition")
 public class PetitionController {
   @Autowired
+  PetitionRepository petitionRepository;
+  @Autowired
   PetitionService petitionService;
 
   @Autowired
@@ -45,6 +51,8 @@ public class PetitionController {
 
   @Autowired
   ReunionService reunionService;
+  @Autowired
+  AssignedFreeDayRepository assignedFreeDayRepository;
 
   @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
   @PostMapping(produces = "application/json", consumes = "application/json")
@@ -92,6 +100,18 @@ public class PetitionController {
         ArrayList<String> employee = new ArrayList<>();
         employee.add(petitionDTO.getReceiver().getUsername());
         teamService.addEmployeesToTeam(employee, petitionDTO.getTeam().getTeamId());
+      }
+      if (petitionDTO.getAssignedFreeDay() != null) {
+        AssignedFreeDay assignedFreeDay =
+            assignedFreeDayRepository.findById(petitionDTO.getAssignedFreeDay().getFreeDayId())
+                .orElseThrow(RuntimeException::new);
+        if (petitionRepository.findByAssignedFreeDayFreeDayId(assignedFreeDay.getFreeDayId()).stream()
+            .filter(petition -> petition.getStatus().equals("Pendiente")).collect(
+                Collectors.toList()).isEmpty()) {
+          assignedFreeDay.setStatus("Aceptada");
+          assignedFreeDayRepository.save(assignedFreeDay);
+        }
+
       }
     }
     return new ResponseEntity<>(petitionDTO, HttpStatus.OK);

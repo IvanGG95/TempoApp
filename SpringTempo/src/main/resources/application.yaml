@@ -15,6 +15,8 @@ spring:
     throw-exception-if-no-handler-found: true
   resources:
     add-mappings: false
+  jackson:
+    time-zone: UTC
 logging:
   level:
     root: INFO

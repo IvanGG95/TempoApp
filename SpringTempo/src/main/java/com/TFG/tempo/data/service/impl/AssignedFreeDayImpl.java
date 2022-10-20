@@ -4,12 +4,14 @@ import com.TFG.tempo.data.dtos.AssignedFreeDayDTO;
 import com.TFG.tempo.data.dtos.DayDTO;
 import com.TFG.tempo.data.dtos.ReunionDTO;
 import com.TFG.tempo.data.entities.AssignedFreeDay;
+import com.TFG.tempo.data.entities.Petition;
 import com.TFG.tempo.data.entities.Reunion;
 import com.TFG.tempo.data.entities.Team;
 import com.TFG.tempo.data.entities.User;
 import com.TFG.tempo.data.mapper.AssignedFreeDaysMapper;
 import com.TFG.tempo.data.mapper.ReunionMapper;
 import com.TFG.tempo.data.repository.AssignedFreeDayRepository;
+import com.TFG.tempo.data.repository.PetitionRepository;
 import com.TFG.tempo.data.repository.ReunionRepository;
 import com.TFG.tempo.data.repository.TeamRepository;
 import com.TFG.tempo.data.repository.UserRepository;
@@ -33,18 +35,20 @@ import org.springframework.stereotype.Service;
 public class AssignedFreeDayImpl implements AssignedFreeDayService {
 
   @Autowired
-  ReunionMapper reunionMapper;
+  private ReunionMapper reunionMapper;
   @Autowired
-  UserRepository userRepository;
+  private UserRepository userRepository;
   @Autowired
-  AssignedFreeDaysMapper assignedFreeDaysMapper;
+  private AssignedFreeDaysMapper assignedFreeDaysMapper;
   @Autowired
   private AssignedFreeDayRepository assignedFreeDayRepository;
   @Autowired
   private ReunionRepository reunionRepository;
-
   @Autowired
-  TeamRepository teamRepository;
+  private TeamRepository teamRepository;
+  @Autowired
+  private PetitionRepository petitionRepository;
+
 
   @Override
   public void addAnAssignedDay(Date date, Long userId) {
@@ -63,13 +67,33 @@ public class AssignedFreeDayImpl implements AssignedFreeDayService {
       Optional<User> user = userRepository.findById(dateDTO.getUserId());
       if (!assignedFreeDayRepository.existsByUserUserIdAndDate(dateDTO.getUserId(), dateDTO.getDate()) &&
           user.isPresent()) {
-        assignedFreeDayRepository.save(AssignedFreeDay.builder().date(dateDTO.getDate()).user(user.get()).build());
+        AssignedFreeDay assignedFreeDay =
+            assignedFreeDayRepository
+                .save(AssignedFreeDay.builder().date(dateDTO.getDate()).user(user.get()).status("Pendiente").build());
+        sendAprobalPetition(user.get(), assignedFreeDay);
         updateFreeDaysUser(dateDTO.getUserId());
       } else {
         duplicatedDays.add(dateDTO);
       }
     }
     return duplicatedDays;
+  }
+
+  private void sendAprobalPetition(User user, AssignedFreeDay assignedFreeDay) {
+    List<Team> teamsOwner = teamRepository.findByOwnerUsername(user.getUsername());
+    List<Team> teamsEmployee = teamRepository.findByEmployeesUsername(user.getUsername());
+    if (teamsEmployee.isEmpty() && (!teamsOwner.isEmpty())) {
+      assignedFreeDay.setStatus("Aceptada");
+    } else {
+      for (Team team : teamsEmployee) {
+        petitionRepository.save(Petition.builder()
+            .creationDate(new Date())
+            .creator(user)
+            .receiver(team.getOwner())
+            .assignedFreeDay(assignedFreeDay)
+            .status("Pendiente").build());
+      }
+    }
   }
 
 
@@ -80,8 +104,13 @@ public class AssignedFreeDayImpl implements AssignedFreeDayService {
       Optional<User> user = userRepository.findById(dateDTO.getUserId());
       if (assignedFreeDayRepository.existsByUserUserIdAndDate(dateDTO.getUserId(), dateDTO.getDate()) &&
           user.isPresent()) {
+        AssignedFreeDay assignedFreeDay =
+            assignedFreeDayRepository.findByUserUserIdAndDate(user.get().getUserId(), dateDTO.getDate());
+        petitionRepository.findByAssignedFreeDayFreeDayId(assignedFreeDay.getFreeDayId()).forEach(petition -> {
+          petitionRepository.delete(petition);
+        });
         assignedFreeDayRepository
-            .delete(assignedFreeDayRepository.findByUserUserIdAndDate(user.get().getUserId(), dateDTO.getDate()));
+            .delete(assignedFreeDay);
         updateFreeDaysUserDelete(user.get().getUserId());
       } else {
         notFoundDays.add(dateDTO);
@@ -127,6 +156,9 @@ public class AssignedFreeDayImpl implements AssignedFreeDayService {
       for (AssignedFreeDayDTO assignedFreeDay : day.getAssignedFreeDays()) {
         if (isSameDay(firstMondayWeek, assignedFreeDay.getDate()) && assignedFreeDay.getUsername().equals(userName)) {
           day.setHolidays(true);
+          if ("Pendiente".equals(assignedFreeDay.getStatus())) {
+            day.setPending(true);
+          }
         }
         if (!day.isHolidays()) {
           if (day.getAssignedFreeDays().size() >= maxHolidays) {

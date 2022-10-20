@@ -1,5 +1,8 @@
 package com.TFG.tempo.controller;
 
+import static com.TFG.tempo.ControllerLogger.logMethod;
+
+
 import com.TFG.tempo.data.dtos.PetitionDTOAdd;
 import com.TFG.tempo.data.dtos.ReunionAddDTO;
 import com.TFG.tempo.data.dtos.ReunionDTO;
@@ -9,9 +12,7 @@ import com.TFG.tempo.data.service.api.PetitionService;
 import com.TFG.tempo.data.service.api.ReunionService;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.logging.Logger;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -42,14 +43,8 @@ public class ReunionController {
   @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
   @PostMapping(produces = "application/json", consumes = "application/json")
   public ResponseEntity<Object> addReunion(@Valid @RequestBody ReunionAddDTO reunionAddDTO) {
-    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd 'at' HH:mm:ss");
-    Date date = new Date(System.currentTimeMillis());
-
-    Logger.getGlobal().info("[INFO Controller] ///\\\\\\ Tempo " + formatter.format(date) +
-        this.getClass().getSimpleName() + " - " +
-        new Object() {
-        }.getClass().getEnclosingMethod().getName());
-
+    logMethod(this.getClass().getSimpleName(), new Object() {
+    }.getClass().getEnclosingMethod().getName());
     ReunionDTO reunion = reunionMapper.toReunionDTO(reunionService.addReunion(reunionAddDTO));
     for (String userName : reunionAddDTO.getUsers()) {
       petitionService.addPetition(
@@ -65,17 +60,10 @@ public class ReunionController {
   @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
   @GetMapping(value = "/{userName}", produces = "application/json")
   public ResponseEntity<Object> getReunionByUserName(@PathVariable("userName") String userName) {
-
-    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd 'at' HH:mm:ss");
     SimpleDateFormat formatterDay = new SimpleDateFormat("yyyy-MM-dd");
     SimpleDateFormat formatterHour = new SimpleDateFormat("HH:mm:ss");
-    Date date = new Date(System.currentTimeMillis());
-
-    Logger.getGlobal().info("[INFO Controller] ///\\\\\\ Tempo " + formatter.format(date) +
-        this.getClass().getSimpleName() + " - " +
-        new Object() {
-        }.getClass().getEnclosingMethod().getName());
-
+    logMethod(this.getClass().getSimpleName(), new Object() {
+    }.getClass().getEnclosingMethod().getName());
 
     List<ReunionDTO> reunionDTOs = new ArrayList<>();
     for (Reunion reunion : reunionService.findByCreatorUserUsername(userName)) {
@@ -97,15 +85,8 @@ public class ReunionController {
   @PostMapping(value = "/addAssistants/{reunionId}", produces = "application/json", consumes = "application/json")
   public ResponseEntity<Object> addAssistants(@PathVariable("reunionId") Long reunionId,
                                               @RequestBody List<String> userNames) {
-
-    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd 'at' HH:mm:ss");
-    Date date = new Date(System.currentTimeMillis());
-
-    Logger.getGlobal().info("[INFO Controller] ///\\\\\\ Tempo " + formatter.format(date) +
-        this.getClass().getSimpleName() + " - " +
-        new Object() {
-        }.getClass().getEnclosingMethod().getName());
-
+    logMethod(this.getClass().getSimpleName(), new Object() {
+    }.getClass().getEnclosingMethod().getName());
     Reunion reunion = reunionService.findById(reunionId);
     for (String name : userNames) {
       petitionService.addPetition(
@@ -123,16 +104,8 @@ public class ReunionController {
   @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
   @DeleteMapping(value = "/{reunionId}", produces = "application/json", consumes = "application/json")
   public ResponseEntity<Object> deleteReunion(@PathVariable("reunionId") Long reunionId) {
-
-    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd 'at' HH:mm:ss");
-    Date date = new Date(System.currentTimeMillis());
-
-    Logger.getGlobal().info("[INFO Controller] ///\\\\\\ Tempo " + formatter.format(date) +
-        this.getClass().getSimpleName() + " - " +
-        new Object() {
-        }.getClass().getEnclosingMethod().getName());
-
-
+    logMethod(this.getClass().getSimpleName(), new Object() {
+    }.getClass().getEnclosingMethod().getName());
     return new ResponseEntity<>(reunionService.deleteReunion(reunionId), HttpStatus.OK);
   }
 
@@ -140,18 +113,11 @@ public class ReunionController {
   @PostMapping(value = "exitReunion/{reunionId}/{username}", produces = "application/json")
   public ResponseEntity<Object> exitReunion(@PathVariable("reunionId") Long teamId,
                                             @PathVariable("username") String username) {
-
-    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd 'at' HH:mm:ss");
-    Date date = new Date(System.currentTimeMillis());
-    Logger.getGlobal().info("[INFO Controller] ///\\\\\\ Tempo " + formatter.format(date) +
-        this.getClass().getSimpleName() + " - " +
-        new Object() {
-        }.getClass().getEnclosingMethod().getName());
-
+    logMethod(this.getClass().getSimpleName(), new Object() {
+    }.getClass().getEnclosingMethod().getName());
     if (!reunionService.exitReunion(teamId, username)) {
       return new ResponseEntity<>("[\"El usuario no pudo ser elminado de la reunion\"]", HttpStatus.BAD_REQUEST);
     }
-
     return new ResponseEntity<>("[\"Todo Bene\"]", HttpStatus.OK);
   }
 

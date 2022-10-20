@@ -28,6 +28,8 @@ public class PetitionDTO {
 
   private TeamDTO team;
 
+  private AssignedFreeDayDTO assignedFreeDay;
+
   private String status;
 
   @JsonPOJOBuilder(withPrefix = "")

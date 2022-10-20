@@ -48,5 +48,9 @@ public class Petition implements Serializable {
   @JoinColumn(referencedColumnName = "teamId")
   private Team team;
 
+  @ManyToOne
+  @JoinColumn(referencedColumnName = "freeDayId")
+  private AssignedFreeDay assignedFreeDay;
+
   private String status;
 }
