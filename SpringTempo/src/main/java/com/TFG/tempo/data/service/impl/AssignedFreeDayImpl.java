@@ -28,6 +28,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.TimeZone;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -141,7 +142,7 @@ public class AssignedFreeDayImpl implements AssignedFreeDayService {
   public List<DayDTO> getMonthsCalendar(Date date, String userName) {
     SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
     List<DayDTO> days = new ArrayList<>();
-    Date firstMondayWeek = getFirstMondayWeek(date);
+    Date firstMondayWeek = new Date(getFirstMondayWeek(date).getTime());
     for (int i = 0; i < 48; i++) {
       DayDTO day = new DayDTO();
       day.setAssignedFreeDays(relatedPersons(getAssignedFreeDays(firstMondayWeek), userName));
@@ -162,7 +163,7 @@ public class AssignedFreeDayImpl implements AssignedFreeDayService {
         }
         if (!day.isHolidays()) {
           if (day.getAssignedFreeDays().size() >= maxHolidays) {
-            day.setTaken(true);
+            //day.setTaken(true);
           }
         }
       }
@@ -298,8 +299,7 @@ public class AssignedFreeDayImpl implements AssignedFreeDayService {
     for (Object name : usernames) {
       users.add(userRepository.findByUsername(name));
     }
-
-    return users;
+    return users.stream().distinct().collect(Collectors.toList());
   }
 
   List<AssignedFreeDayDTO> relatedPersons(List<AssignedFreeDayDTO> assignedFreeDays, String username) {
